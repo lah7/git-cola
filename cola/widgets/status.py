@@ -1047,9 +1047,10 @@ class StatusTreeWidget(QtWidgets.QTreeWidget):
         path = item.path
         deleted = item.deleted
         image = self.image_formats.ok(path)
+        svg_text = path.endswith(".svg") and prefs.plain_text_svg(context)
 
-        # Images are diffed differently
-        if image:
+        # Images are diffed differently. SVGs could be text or image diff.
+        if image and not svg_text:
             cmds.do(
                 cmds.DiffImage,
                 context,
@@ -1060,6 +1061,7 @@ class StatusTreeWidget(QtWidgets.QTreeWidget):
                 unmerged,
                 untracked,
             )
+
         elif staged:
             cmds.do(cmds.DiffStaged, context, path, deleted=deleted)
         elif modified:

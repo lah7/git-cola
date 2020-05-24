@@ -37,6 +37,7 @@ SAVEWINDOWSETTINGS = 'cola.savewindowsettings'
 SHOW_PATH = 'cola.showpath'
 SORT_BOOKMARKS = 'cola.sortbookmarks'
 SPELL_CHECK = 'cola.spellcheck'
+SVG_PLAIN_TEXT = 'cola.svgplaintext'
 STATUS_INDENT = 'cola.statusindent'
 STATUS_SHOW_TOTALS = 'cola.statusshowtotals'
 THEME = 'cola.theme'
@@ -82,6 +83,7 @@ class Defaults(object):
     hidpi = hidpi.Option.AUTO
     status_indent = False
     status_show_totals = False
+    svg_plain_text = False
 
 
 def blame_viewer(context):
@@ -175,6 +177,11 @@ def maxrecent(context):
 def spellcheck(context):
     """Should we spellcheck commit messages?"""
     return context.cfg.get(SPELL_CHECK, default=Defaults.spellcheck)
+
+
+def plain_text_svg(context):
+    """Should we compare SVGs as text or as a rendered image?"""
+    return context.cfg.get(SVG_PLAIN_TEXT, default=Defaults.svg_plain_text)
 
 
 def expandtab(context):
