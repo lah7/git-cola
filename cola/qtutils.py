@@ -781,7 +781,7 @@ def ok_button(text, default=True, enabled=True, icon=None):
 
 def close_button(text=None, icon=None):
     text = text or N_('Close')
-    icon = icons.mkicon(icon, icons.close)
+    icon = icons.from_theme("dialog-cancel")
     return create_button(text=text, icon=icon)
 
 
