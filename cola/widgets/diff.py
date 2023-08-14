@@ -1074,10 +1074,10 @@ class DiffEditor(DiffTextEdit):
                 add_action(qtutils.menu_separator(menu))
                 self.action_edit_and_apply_selection.setText(edit_and_apply_text)
                 self.action_edit_and_apply_selection.setIcon(icons.add())
-                add_action(self.action_edit_and_apply_selection)
+                # add_action(self.action_edit_and_apply_selection)
 
                 self.action_edit_and_revert_selection.setText(edit_and_revert_text)
-                add_action(self.action_edit_and_revert_selection)
+                # add_action(self.action_edit_and_revert_selection)
 
         if s.staged and model.is_unstageable():
             item = s.staged[0]
@@ -1120,7 +1120,7 @@ class DiffEditor(DiffTextEdit):
                     edit_and_apply_text = N_('Edit Diff Hunk to Unstage...')
                 self.action_edit_and_apply_selection.setText(edit_and_apply_text)
                 self.action_edit_and_apply_selection.setIcon(icons.remove())
-                add_action(self.action_edit_and_apply_selection)
+                # add_action(self.action_edit_and_apply_selection)
 
         if not edit_actions_added and (model.is_stageable() or model.is_unstageable()):
             add_action(qtutils.menu_separator(menu))
