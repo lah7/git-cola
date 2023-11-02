@@ -716,7 +716,6 @@ def create_button(
         button.setText(' ' + text)
     if icon is not None:
         button.setIcon(icon)
-        button.setIconSize(QtCore.QSize(defs.small_icon, defs.small_icon))
     if tooltip is not None:
         button.setToolTip(tooltip)
     if layout is not None:
@@ -769,7 +768,6 @@ def create_action_button(tooltip=None, icon=None, visible=None):
         button.setToolTip(tooltip)
     if icon is not None:
         button.setIcon(icon)
-        button.setIconSize(QtCore.QSize(defs.small_icon, defs.small_icon))
     if visible is not None:
         button.setVisible(visible)
     return button
