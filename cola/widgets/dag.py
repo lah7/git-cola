@@ -1432,8 +1432,8 @@ class Commit(QtWidgets.QGraphicsItem):
     )
     inner_rect = inner_rect.boundingRect()
 
-    commit_color = QtGui.QColor(Qt.white)
-    outline_color = commit_color.darker()
+    commit_color = QtGui.QColor(27, 30, 32)
+    outline_color = QtGui.QColor(Qt.green)
     merge_color = QtGui.QColor(Qt.lightGray)
 
     commit_selected_color = QtGui.QColor(Qt.green)
@@ -1507,7 +1507,33 @@ class Commit(QtWidgets.QGraphicsItem):
         return self.item_shape
 
     def paint(self, painter, option, _widget):
-        # Do not draw outside the exposed rectangle.
+        # Change outline depending on commit (use first one)
+        if self.commit.tags:
+            tag = self.commit.tags[0]
+
+            HEAD = 'HEAD'
+            remotes_prefix = 'remotes/'
+            tags_prefix = 'tags/'
+            heads_prefix = 'heads/'
+
+            head_color = QtGui.QColor(Qt.green)
+            other_color = QtGui.QColor(Qt.white)
+            remote_color = QtGui.QColor(Qt.yellow)
+
+            if tag == HEAD:
+                self.commit_pen.setColor(remote_color)
+            elif tag.startswith(remotes_prefix):
+                self.commit_pen.setColor(other_color)
+            elif tag.startswith(tags_prefix):
+                self.commit_pen.setColor(remote_color)
+            elif tag.startswith(heads_prefix):
+                self.commit_pen.setColor(head_color)
+            else:
+                self.commit_pen.setColor(self.outline_color)
+        else:
+            self.commit_pen.setColor(self.outline_color)
+
+        # Do not draw outside the exposed rect
         painter.setClipRect(option.exposedRect)
 
         # Draw ellipse
@@ -1542,11 +1568,11 @@ class Label(QtWidgets.QGraphicsItem):
 
     head_pen = QtGui.QPen()
     head_pen.setColor(QtGui.QColor(Qt.black))
-    head_pen.setWidth(1)
+    head_pen.setWidth(0)
 
     text_pen = QtGui.QPen()
     text_pen.setColor(QtGui.QColor(Qt.black))
-    text_pen.setWidth(1)
+    text_pen.setWidth(0)
 
     border = 1
     item_spacing = 8
@@ -1609,25 +1635,24 @@ class Label(QtWidgets.QGraphicsItem):
         tags_len = len(tags_prefix)
         heads_len = len(heads_prefix)
 
+        def _set_outline_colour(painter, colour):
+            self.text_pen.setColor(colour)
+            painter.setPen(self.text_pen)
+
         for tag in self.commit.tags:
             if tag == HEAD:
-                painter.setPen(self.text_pen)
-                painter.setBrush(self.remote_color)
+                _set_outline_colour(painter, self.remote_color)
             elif tag.startswith(remotes_prefix):
                 tag = tag[remotes_len:]
-                painter.setPen(self.text_pen)
-                painter.setBrush(self.other_color)
+                _set_outline_colour(painter, self.other_color)
             elif tag.startswith(tags_prefix):
                 tag = tag[tags_len:]
-                painter.setPen(self.text_pen)
-                painter.setBrush(self.remote_color)
+                _set_outline_colour(painter, self.remote_color)
             elif tag.startswith(heads_prefix):
                 tag = tag[heads_len:]
-                painter.setPen(self.head_pen)
-                painter.setBrush(self.head_color)
+                _set_outline_colour(painter, self.head_color)
             else:
-                painter.setPen(self.text_pen)
-                painter.setBrush(self.other_color)
+                _set_outline_colour(painter, self.other_color)
 
             text_rect = painter.boundingRect(
                 QRectF(current_width, 0, 0, 0), Qt.TextSingleLine, tag
