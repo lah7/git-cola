@@ -27,7 +27,7 @@ from . import defs
 from . import standard
 from .selectcommits import select_commits
 from .spellcheck import SpellCheckLineEdit, SpellCheckTextEdit
-from .text import anchor_mode
+from .text import LineEdit, anchor_mode
 
 
 class CommitMessageEditor(QtWidgets.QFrame):
@@ -595,7 +595,6 @@ class CommitMessageEditor(QtWidgets.QFrame):
             spell_check.add_word('Closes')
             spell_check.add_word('Fixes')
 
-        self.summary.highlighter.enable(enabled)
         self.description.highlighter.enable(enabled)
 
     def show_cursor_position(self, rows, cols):
@@ -836,24 +835,23 @@ class CommitDateDialog(QtWidgets.QDialog):
         self._update_slider_from_datetime(commit_datetime)
 
 
-class CommitSummaryLineEdit(SpellCheckLineEdit):
+class CommitSummaryLineEdit(LineEdit):
     """Text input field for the commit summary"""
 
     down_pressed = Signal()
     accepted = Signal()
 
     def __init__(self, context, check=None, parent=None):
+        super().__init__(parent)
         hint = N_('Commit summary')
-        SpellCheckLineEdit.__init__(self, context, hint, check=check, parent=parent)
+        self.setPlaceholderText(hint)
         self._comment_char = None
-        self._refresh_config()
 
         self.textChanged.connect(self._update_summary_text, Qt.QueuedConnection)
         context.cfg.updated.connect(self._refresh_config, type=Qt.QueuedConnection)
 
     def _refresh_config(self):
         """Update comment char in response to config changes"""
-        self._comment_char = prefs.comment_char(self.context)
 
     def _update_summary_text(self):
         """Prevent commit messages from starting with comment characters"""
@@ -873,17 +871,6 @@ class CommitSummaryLineEdit(SpellCheckLineEdit):
                 position = max(0, min(position - 1, len(value) - 1))
                 cursor.setPosition(position)
                 self.setTextCursor(cursor)
-
-    def keyPressEvent(self, event):
-        """Allow "Enter" to focus into the extended description field"""
-        event_key = event.key()
-        if event_key in (
-            Qt.Key_Enter,
-            Qt.Key_Return,
-        ):
-            self.accepted.emit()
-            return
-        SpellCheckLineEdit.keyPressEvent(self, event)
 
 
 class CommitMessageTextEdit(SpellCheckTextEdit):
