@@ -590,6 +590,12 @@ class CommitTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         self.setText(1, commit.author)
         self.setText(2, commit.authdate)
 
+        # Set font colour to blue to identify commits to squash
+        if commit.summary.startswith('fixup!'):
+            self.setForeground(0, QtGui.QBrush(QtGui.QColor('#35a5eb')))
+            self.setForeground(1, QtGui.QBrush(QtGui.QColor('#35a5eb')))
+            self.setForeground(2, QtGui.QBrush(QtGui.QColor('#35a5eb')))
+
 
 class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
     """Display commits using a flat treewidget in "list" mode"""
