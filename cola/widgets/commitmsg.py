@@ -101,7 +101,7 @@ class CommitMessageEditor(QtWidgets.QFrame):
 
         commit_button_tooltip = N_('Commit staged changes\nShortcut: Ctrl+Enter')
         self.commit_button = qtutils.create_button(
-            text=N_('Commit@@verb'), tooltip=commit_button_tooltip, icon=icons.commit()
+            text=N_('Commit@@verb'), tooltip=commit_button_tooltip, icon=icons.save()
         )
         self.commit_group = Group(self.commit_action, self.commit_button)
         self.commit_progress_bar = standard.progress_bar(
