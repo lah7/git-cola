@@ -97,6 +97,7 @@ class MainView(standard.MainWindow):
             'Status',
             N_('Status'),
             self,
+            hide_title=True,
             func=lambda dock: status.StatusWidget(context, dock.titleBarWidget(), dock),
         )
         self.statuswidget = self.statusdock.widget()
@@ -149,7 +150,6 @@ class MainView(standard.MainWindow):
             'Commit', N_('Commit'), self, widget=editor, hide_title=True, stretch=False
         )
         titlebar = self.commitdock.titleBarWidget()
-        titlebar.add_title_widget(self.commiteditor.topwidget)
 
         # "Console" widget
         self.logwidget = log.LogWidget(context)
