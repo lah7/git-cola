@@ -770,6 +770,10 @@ def create_action_button(tooltip=None, icon=None, visible=None):
         button.setIcon(icon)
     if visible is not None:
         button.setVisible(visible)
+
+    if tooltip == "Close":
+        button.setHidden(True)
+
     return button
 
 
