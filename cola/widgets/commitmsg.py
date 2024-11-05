@@ -111,7 +111,6 @@ class CommitMessageEditor(QtWidgets.QFrame):
 
         # make the position label fixed size to avoid layout issues
         font = qtutils.default_monospace_font()
-        font.setPixelSize(defs.action_text)
         text_width = qtutils.text_width(font, '999:999')
         cursor_position_label = self.cursor_position_label = QtWidgets.QLabel(self)
         cursor_position_label.setFont(font)
