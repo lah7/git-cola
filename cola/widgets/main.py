@@ -422,7 +422,7 @@ class MainView(standard.MainWindow):
             partial(stash.view, context),
             hotkeys.STASH,
         )
-        self.stash_action.setIcon(icons.commit())
+        self.stash_action.setIcon(icons.stash())
 
         self.reset_soft_action = qtutils.add_action_with_tooltip(
             self,
@@ -568,14 +568,14 @@ class MainView(standard.MainWindow):
         self.delete_branch_action = add_action(
             self, N_('Delete...'), partial(guicmds.delete_branch, context)
         )
-        self.delete_branch_action.setIcon(icons.discard())
+        self.delete_branch_action.setIcon(icons.delete_branch())
 
         self.delete_remote_branch_action = add_action(
             self,
             N_('Delete Remote Branch...'),
             partial(guicmds.delete_remote_branch, context),
         )
-        self.delete_remote_branch_action.setIcon(icons.discard())
+        self.delete_remote_branch_action.setIcon(icons.delete_branch())
 
         self.rename_branch_action = add_action(
             self, N_('Rename Branch...'), partial(guicmds.rename_branch, context)
