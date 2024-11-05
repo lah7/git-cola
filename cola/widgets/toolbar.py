@@ -206,6 +206,7 @@ class ToolBar(QtWidgets.QToolBar):
         self.setWindowTitle(title)
         self.setObjectName(title)
         self.setToolButtonStyle(Qt.ToolButtonFollowStyle)
+        self.setMovable(False)
 
         self.context = context
         self.tree_layout = tree_layout
