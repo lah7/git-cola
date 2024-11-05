@@ -144,7 +144,7 @@ def status(filename, deleted, is_staged, untracked):
 
 def three_bars():
     """Three-bars icon"""
-    return icon('three-bars.svg')
+    return from_theme('view-list-text', fallback='three-bars.svg')
 
 
 def add():
@@ -154,17 +154,18 @@ def add():
 
 def alphabetical():
     """Alphabetical icon"""
-    return from_theme('view-sort', fallback='a-z-order.svg')
+    return from_theme('view-sort-ascending', fallback='a-z-order.svg')
 
 
 def branch():
     """Branch icon"""
-    return icon('git-branch.svg')
+    return from_theme('vcs-branch', fallback='git-branch.svg')
 
 
 def check_name():
     """Check mark icon name"""
     return name_from_basename('check.svg')
+    return from_theme('checkmark', fallback='check.svg')
 
 
 def cherry_pick():
@@ -179,7 +180,7 @@ def circle_slash_red():
 
 def close():
     """Close icon"""
-    return icon('x.svg')
+    return icon('window-close.svg')
 
 
 def cola():
@@ -189,17 +190,22 @@ def cola():
 
 def commit():
     """Commit icon"""
-    return icon('document-save-symbolic.svg')
+    return from_theme('vcs-commit', fallback='document-save-symbolic.svg')
+
+
+def stash():
+    """Stash icon"""
+    return from_theme('edit-clear-history-symbolic', fallback='document-save-symbolic.svg') # vcs-stash, folder-stash
 
 
 def compare():
     """Compare icon"""
-    return icon('git-compare.svg')
+    return from_theme('kr_comparedirs', fallback='git-compare.svg')
 
 
 def configure():
     """Configure icon"""
-    return icon('gear.svg')
+    return from_theme('configure-symbolic', fallback='gear.svg')
 
 
 def cut():
@@ -219,7 +225,7 @@ def paste():
 
 def play():
     """Play icon"""
-    return icon('play.svg')
+    return from_theme('media-playback-start', fallback='play.svg')
 
 
 def delete():
@@ -227,9 +233,14 @@ def delete():
     return from_theme('edit-delete', fallback='trashcan.svg')
 
 
+def delete_branch():
+    """Delete icon for branches"""
+    return from_theme('vcs-branch-delete', fallback='trashcan.svg')
+
+
 def default_app():
     """Default app icon"""
-    return icon('telescope.svg')
+    return from_theme('system-run', fallback='telescope.svg')
 
 
 def dot_name():
@@ -239,7 +250,7 @@ def dot_name():
 
 def download():
     """Download icon"""
-    return icon('file-download.svg')
+    return from_theme('download-symbolic', fallback='file-download.svg')
 
 
 def discard():
@@ -264,7 +275,7 @@ def directory():
 
 def diff():
     """Diff icon"""
-    return icon('diff.svg')
+    return from_theme('vcs-diff', fallback='diff.svg')
 
 
 def edit():
@@ -274,42 +285,42 @@ def edit():
 
 def ellipsis():
     """Ellipsis icon"""
-    return icon('ellipsis.svg')
+    return from_theme('view-filter', fallback='ellipsis.svg')
 
 
 def external():
     """External link icon"""
-    return icon('link-external.svg')
+    return from_theme('link', fallback='link-external.svg')
 
 
 def file_code():
     """Code file icon"""
-    return icon('file-code.svg')
+    return from_theme('text-xml', fallback='file-code.svg')
 
 
 def file_text():
     """Text file icon"""
-    return icon('file-text.svg')
+    return from_theme('text-plain', fallback='file-text.svg')
 
 
 def file_zip():
     """Zip file / tarball icon"""
-    return icon('file-zip.svg')
+    return from_theme('application-x-zip', fallback='file-zip.svg')
 
 
 def fold():
     """Fold icon"""
-    return icon('fold.svg')
+    return from_theme('collapse', fallback='fold.svg')
 
 
 def merge():
     """Merge icon"""
-    return icon('git-merge.svg')
+    return from_theme('vcs-merge-request', fallback='git-merge.svg')
 
 
 def modified():
     """Modified icon"""
-    return icon('modified.svg')
+    return from_theme('modified-symbolic', fallback='modified.svg')
 
 
 def modified_name():
@@ -344,12 +355,12 @@ def open_directory():
 
 def up():
     """Previous icon"""
-    return icon('arrow-up.svg')
+    return from_theme('arrow-up', fallback='arrow-up.svg')
 
 
 def down():
     """Go to next item icon"""
-    return icon('arrow-down.svg')
+    return from_theme('arrow-down', fallback='arrow-down.svg')
 
 
 def partial_name():
@@ -359,17 +370,22 @@ def partial_name():
 
 def pull():
     """Pull icon"""
-    return icon('repo-pull.svg')
+    return from_theme('vcs-update-cvs-cervisia', fallback='repo-pull.svg') # vcs-pull, vcs-update-cvs-cervisia, download-later-symbolic
 
 
 def push():
     """Push icon"""
-    return icon('repo-push.svg')
+    return from_theme('vcs-commit-cvs-cervisia', fallback='repo-push.svg') # vcs-push, vcs-commit-cvs-cervisia, upload-later-symbolic
+
+
+def fetch():
+    """Push icon"""
+    return from_theme('view-refresh-symbolic', fallback='repo-push.svg') # cloud-download
 
 
 def question():
     """Question icon"""
-    return icon('question.svg')
+    return from_theme('question', fallback='question.svg')
 
 
 def remove():
@@ -379,12 +395,12 @@ def remove():
 
 def repo():
     """Repository icon"""
-    return icon('repo.svg')
+    return from_theme('folder-symbolic', fallback='repo.svg')
 
 
 def reverse_chronological():
     """Reverse chronological icon"""
-    return icon('last-first-order.svg')
+    return from_theme('view-sort-descending', fallback='last-first-order.svg')
 
 
 def save():
@@ -419,17 +435,17 @@ def star():
 
 def sync():
     """Sync/update icon"""
-    return icon('sync.svg')
+    return from_theme('view-refresh-symbolic', fallback='sync.svg')
 
 
 def tag():
     """Tag icon"""
-    return icon('tag.svg')
+    return from_theme('tag', fallback='tag.svg')
 
 
 def terminal():
     """Terminal icon"""
-    return icon('terminal.svg')
+    return from_theme('utilities-terminal-symbolic', fallback='terminal.svg')
 
 
 def undo():
@@ -459,7 +475,7 @@ def style_dialog_reset():
 
 def unfold():
     """Expand/unfold icon"""
-    return icon('unfold.svg')
+    return from_theme('expand', fallback='unfold.svg')
 
 
 def visualize():
