@@ -164,14 +164,13 @@ class MainView(standard.MainWindow):
             N_('Diff'),
             self,
             func=lambda dock: diff.Viewer(context, parent=dock),
-            hide_title=True,
         )
         self.diffviewer = self.diffdock.widget()
         self.diffviewer.set_diff_type(self.model.diff_type)
         self.diffviewer.enable_filename_tracking()
         self.diffeditor = self.diffviewer.text
         titlebar = self.diffdock.titleBarWidget()
-        titlebar.add_title_widget(self.diffviewer.options)
+        titlebar.add_corner_widget(self.diffviewer.options)
         titlebar.add_title_widget(self.diffviewer.filename)
 
         # All Actions
