@@ -93,17 +93,17 @@ COMMANDS = {
     #     'action': prefs.preferences,
     #     'icon': 'configure'
     # },
-    'Actions::Fetch': {'title': 'Fetch...', 'action': remote.fetch, 'icon': 'download'},
+    'Actions::Fetch': {'title': 'Fetch...', 'action': remote.fetch, 'icon': 'fetch'},
     'Actions::Pull': {'title': 'Pull...', 'action': remote.pull, 'icon': 'pull'},
     'Actions::Push': {'title': 'Push...', 'action': remote.push, 'icon': 'push'},
-    'Actions::Stash': {'title': 'Stash...', 'action': stash.view, 'icon': 'commit'},
+    'Actions::Stash': {'title': 'Stash...', 'action': stash.view, 'icon': 'stash'},
     'Actions::CreateTag': {
         'title': 'Create Tag...',
         'action': createtag.create_tag,
         'icon': 'tag',
     },
     'Actions::CherryPick': {
-        'title': 'Cherry-Pick...',
+        'title': 'Cherry Pick...',
         'action': guicmds.cherry_pick,
         'icon': 'cherry_pick',
     },
@@ -245,7 +245,7 @@ COMMANDS = {
     'Branch::Delete': {
         'title': 'Delete...',
         'action': guicmds.delete_branch,
-        'icon': 'discard',
+        'icon': 'delete_branch',
     },
     'Branch::DeleteRemote': {
         'title': 'Delete Remote Branch...',
@@ -258,7 +258,7 @@ COMMANDS = {
         'icon': 'edit',
     },
     'Branch::BrowseCurrent': {
-        'title': 'Browse Current Branch...',
+        'title': 'Browse...',
         'action': guicmds.browse_current,
         'icon': 'directory',
     },
@@ -268,7 +268,7 @@ COMMANDS = {
         'icon': 'directory',
     },
     'Branch::VisualizeCurrent': {
-        'title': 'Visualize Current Branch...',
+        'title': 'Visualize...',
         'action': cmds.run(cmds.VisualizeCurrent),
         'icon': 'visualize',
     },
