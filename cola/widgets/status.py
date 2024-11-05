@@ -714,13 +714,9 @@ class StatusTreeWidget(QtWidgets.QTreeWidget):
             menu.addSeparator()
 
         if not self.selection_model.is_empty():
-            menu.addAction(self.default_app_action)
             menu.addAction(self.parent_dir_action)
 
-        if self.terminal_action is not None:
-            menu.addAction(self.terminal_action)
 
-        menu.addAction(self.worktree_dir_action)
 
         self._add_copy_actions(menu)
 
@@ -757,7 +753,6 @@ class StatusTreeWidget(QtWidgets.QTreeWidget):
             lambda widget=widget: copy_leading_path(context, widget.value()),
         )
 
-        menu.addSeparator()
         menu.addMenu(copy_menu)
         copy_menu.addAction(self.copy_path_action)
         copy_menu.addAction(self.copy_relpath_action)
