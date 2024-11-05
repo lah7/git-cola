@@ -139,7 +139,7 @@ class FileWidget(TreeWidget):
         numbers_max = metrics.horizontalAdvance('12345678')  # Linux had 28,000,000+ LOC of code in 2020.
         numbers_width = min(numbers_max, header_width // 8 - 1)
         files_width = header_width - numbers_width * 2
-        self.setColumnWidth(0, files_width)
+        self.setColumnWidth(0, files_width - 16)
         self.setColumnWidth(1, numbers_width)
         self.setColumnWidth(2, numbers_width)
 
