@@ -123,6 +123,7 @@ class CommitMessageEditor(QtWidgets.QFrame):
             icon=icons.configure(), tooltip=N_('Actions...')
         )
         self.actions_button.setMenu(self.actions_menu)
+        self.actions_button.setStyleSheet("")
 
         self.actions_menu.addAction(self.signoff_action)
         self.actions_menu.addAction(self.commit_action)
