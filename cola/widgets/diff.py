@@ -1181,12 +1181,12 @@ class Options(QtWidgets.QWidget):
         layout = qtutils.hbox(
             defs.no_margin,
             defs.button_spacing,
-            self.options,
+            qtutils.STRETCH,
             self.toggle_image_diff,
             self.filename,
             self.image_mode,
             self.zoom_mode,
-            qtutils.STRETCH,
+            self.options,
         )
         self.setLayout(layout)
 
