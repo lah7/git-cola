@@ -185,10 +185,9 @@ class CommitMessageEditor(QtWidgets.QFrame):
             self.commit_button,
             self.cursor_position_label,
         )
-        self.topwidget = QtWidgets.QWidget()
-        self.topwidget.setLayout(self.toplayout)
 
-        self.mainlayout = qtutils.vbox(defs.no_margin, defs.spacing, self.description)
+        self.mainlayout = qtutils.vbox(defs.no_margin, defs.spacing, self.toplayout, self.description)
+        self.mainlayout.setContentsMargins(4, 0, 4, 0)
         self.setLayout(self.mainlayout)
 
         qtutils.connect_button(self.commit_button, self.commit)
@@ -239,6 +238,7 @@ class CommitMessageEditor(QtWidgets.QFrame):
         model.set_commitmsg(commit_msg)
 
         # Allow tab to jump from the summary to the description
+        self.setTabOrder(self.summary, self.description)
         self.setFont(qtutils.diff_font(context))
         self.setFocusProxy(self.summary)
 
