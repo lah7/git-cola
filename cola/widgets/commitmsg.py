@@ -234,8 +234,8 @@ class CommitMessageEditor(QtWidgets.QFrame):
             self.actions_button,
             self.summary,
             self.commit_progress_bar,
-            self.commit_button,
             self.cursor_position_label,
+            self.commit_button,
         )
         self.topwidget = QtWidgets.QWidget()
         self.topwidget.setLayout(self.toplayout)
