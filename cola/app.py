@@ -190,7 +190,6 @@ class ColaApplication:
             theme_str = self.context.cfg.get('cola.theme', default='default')
         theme = themes.find_theme(theme_str)
         self.theme = theme
-        self._app.setStyleSheet(theme.build_style_sheet(self._app.palette()))
 
         is_macos_theme = theme_str.startswith('macos-')
         if is_macos_theme:
