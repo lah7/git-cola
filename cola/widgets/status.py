@@ -78,8 +78,6 @@ class StatusWidget(QtWidgets.QFrame):
             self, tooltip, self.toggle_filter, hotkeys.FILTER
         )
 
-        titlebar.add_corner_widget(self.exit_diff_mode_button)
-        titlebar.add_corner_widget(self.filter_button)
 
         qtutils.connect_button(self.filter_button, self.toggle_filter)
         qtutils.connect_button(
