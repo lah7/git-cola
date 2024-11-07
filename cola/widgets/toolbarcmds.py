@@ -98,7 +98,7 @@ COMMANDS = {
     'Actions::Push': {'title': 'Push...', 'action': remote.push, 'icon': 'push'},
     'Actions::Stash': {'title': 'Stash...', 'action': stash.view, 'icon': 'stash'},
     'Actions::CreateTag': {
-        'title': 'Create Tag...',
+        'title': 'Tag...',
         'action': createtag.create_tag,
         'icon': 'tag',
     },
@@ -268,7 +268,7 @@ COMMANDS = {
         'icon': 'directory',
     },
     'Branch::VisualizeCurrent': {
-        'title': 'Visualize...',
+        'title': 'Visualize Current Branch...',
         'action': cmds.run(cmds.VisualizeCurrent),
         'icon': 'visualize',
     },
