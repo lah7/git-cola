@@ -108,19 +108,15 @@ class ViewerMixin:
         """Return the currently selected commit object IDs"""
         return [i.commit for i in self.selected_items()]
 
-    def clicked_oid(self, filtered=True):
+    def clicked_oid(self):
         """Return the clicked or selected commit object ID"""
         if self.clicked:
-            oid = self.clicked.oid
-        else:
-            oid = self.selected_oid()
-        if filtered and oid and oid in (dag.STAGE, dag.WORKTREE):
-            oid = None
-        return oid
+            return self.clicked.oid
+        return self.selected_oid()
 
-    def with_oid(self, func, filtered=True):
+    def with_oid(self, func):
         """Run an operation with a commit object ID"""
-        oid = self.clicked_oid(filtered=filtered)
+        oid = self.clicked_oid()
         if oid:
             result = func(oid)
         else:
@@ -207,8 +203,11 @@ class ViewerMixin:
 
     def show_diff(self):
         """Show the diff for the selected commit"""
+        context = self.context
         self.with_oid(
-            lambda oid: _diff_expression(self.context, self, oid), filtered=False
+            lambda oid: difftool.diff_expression(
+                context, self, oid + '^!', hide_expr=False, focus_tree=True
+            )
         )
 
     def show_dir_diff(self):
@@ -216,13 +215,8 @@ class ViewerMixin:
         context = self.context
         self.with_oid(
             lambda oid: difftool.difftool_launch(
-                context,
-                left=oid,
-                left_take_magic=True,
-                dir_diff=True,
-                staged=oid == dag.STAGE,
-            ),
-            filtered=False,
+                context, left=oid, left_take_magic=True, dir_diff=True
+            )
         )
 
     def rebase_to_commit(self):
@@ -268,15 +262,12 @@ class ViewerMixin:
     def save_blob_dialog(self):
         """Save a file blob from the selected commit"""
         context = self.context
-        self.with_oid(
-            lambda oid: browse.BrowseBranch.browse(context, oid), filtered=False
-        )
+        self.with_oid(lambda oid: browse.BrowseBranch.browse(context, oid))
 
     def save_blob_from_parent_dialog(self):
         """Save a file blob from the parent of the selected commit"""
-        self.with_oid(
-            lambda oid: _save_blob_from_parent(self.context, oid), filtered=False
-        )
+        context = self.context
+        self.with_oid(lambda oid: browse.BrowseBranch.browse(context, oid + '^'))
 
     def update_menu_actions(self, event):
         """Update menu actions to reflect the selection state"""
@@ -288,7 +279,6 @@ class ViewerMixin:
         else:
             self.clicked = commit = item.commit
 
-        has_oid = commit and commit.oid not in (dag.WORKTREE, dag.STAGE)
         has_single_selection = len(selected_items) == 1
         has_single_selection_or_clicked = bool(has_single_selection or commit)
         has_selection = bool(selected_items)
@@ -313,56 +303,31 @@ class ViewerMixin:
         self.menu_actions['diff_selected_this'].setEnabled(can_diff)
         self.menu_actions['diff_commit'].setEnabled(has_single_selection_or_clicked)
         self.menu_actions['diff_commit_all'].setEnabled(has_single_selection_or_clicked)
-        self.menu_actions['checkout_branch'].setEnabled(bool(has_branches) and has_oid)
+
+        self.menu_actions['checkout_branch'].setEnabled(bool(has_branches))
         self.menu_actions['checkout_detached'].setEnabled(
-            has_single_selection_or_clicked and has_oid
+            has_single_selection_or_clicked
         )
-        self.menu_actions['cherry_pick'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['copy'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['copy_short'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['create_branch'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['create_patch'].setEnabled(has_selection and has_oid)
-        self.menu_actions['create_tag'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['create_tarball'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
+        self.menu_actions['cherry_pick'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['copy'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['copy_short'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['create_branch'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['create_patch'].setEnabled(has_selection)
+        self.menu_actions['create_tag'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['create_tarball'].setEnabled(has_single_selection_or_clicked)
         self.menu_actions['rebase_to_commit'].setEnabled(
-            has_single_selection_or_clicked and has_oid
+            has_single_selection_or_clicked
         )
-        self.menu_actions['reset_mixed'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['reset_keep'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['reset_merge'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['reset_soft'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['reset_hard'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
+        self.menu_actions['reset_mixed'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['reset_keep'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['reset_merge'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['reset_soft'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['reset_hard'].setEnabled(has_single_selection_or_clicked)
         self.menu_actions['restore_worktree'].setEnabled(
-            has_single_selection_or_clicked and has_oid
+            has_single_selection_or_clicked
         )
-        self.menu_actions['revert'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
-        self.menu_actions['save_blob'].setEnabled(
-            has_single_selection_or_clicked and has_oid
-        )
+        self.menu_actions['revert'].setEnabled(has_single_selection_or_clicked)
+        self.menu_actions['save_blob'].setEnabled(has_single_selection_or_clicked)
         self.menu_actions['save_blob_from_parent'].setEnabled(
             has_single_selection_or_clicked
         )
@@ -401,28 +366,6 @@ class ViewerMixin:
         menu.addAction(self.menu_actions['copy_short'])
         menu.addAction(self.menu_actions['copy'])
         menu.exec_(self.mapToGlobal(event.pos()))
-
-
-def _diff_expression(context, widget, oid):
-    """Launch difftool using the specified object ID"""
-    if oid == dag.WORKTREE:
-        ref = ''
-    elif oid == dag.STAGE:
-        ref = '--cached'
-    else:
-        ref = f'{oid}^!'
-    return difftool.diff_expression(
-        context, widget, ref, hide_expr=False, focus_tree=True
-    )
-
-
-def _save_blob_from_parent(context, oid):
-    """Save a browse dialog to grab a file from the parent commit"""
-    if oid in (dag.STAGE, dag.WORKTREE):
-        ref = 'HEAD'
-    else:
-        ref = f'{oid}^'
-    return browse.BrowseBranch.browse(context, ref)
 
 
 def set_icon(icon, action):
@@ -1264,15 +1207,9 @@ class ReaderThread(QtCore.QThread):
                 self.add.emit(commits)
                 commits = []
 
-        stage, worktree = repo.get_worktree_commits()
-        if stage:
-            commits.append(stage)
-        if worktree:
-            commits.append(worktree)
+        self.status.emit(repo.returncode == 0)
         if commits:
             self.add.emit(commits)
-
-        self.status.emit(repo.returncode == 0)
         self.end.emit()
 
     def start(self):

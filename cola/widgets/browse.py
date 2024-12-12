@@ -1,5 +1,4 @@
 import shlex
-import shutil
 
 from qtpy.QtCore import Qt
 from qtpy.QtCore import Signal
@@ -11,7 +10,6 @@ from ..models.browse import GitRepoModel
 from ..models.browse import GitRepoNameItem
 from ..models.selection import State
 from ..i18n import N_
-from ..models import dag
 from ..interaction import Interaction
 from .. import cmds
 from .. import core
@@ -556,39 +554,16 @@ class SaveBlob(cmds.ContextCommand):
     def do(self):
         git = self.context.git
         model = self.browse_model
-        if model.ref == dag.WORKTREE:
-            try:
-                shutil.copy2(model.relpath, model.filename)
-                err = ''
-                status = 0
-            except OSError as error:
-                err = f'\n{error}'
-                status = 1
-            out = '# shutil.copy2({}, {}){}'.format(
-                shlex.quote(model.relpath),
-                shlex.quote(model.filename),
-                err,
-            )
-            Interaction.command(
-                N_('Error Saving File'), 'shutil.copy2', status, out, err
-            )
-        else:
-            if model.ref == dag.STAGE:
-                model_ref = ':0'
-            else:
-                model_ref = model.ref
-            ref = f'{model_ref}:{model.relpath}'
-            with core.xopen(model.filename, 'wb') as fp:
-                status, output, err = git.cat_file('blob', ref, _stdout=fp)
+        ref = f'{model.ref}:{model.relpath}'
+        with core.xopen(model.filename, 'wb') as fp:
+            status, output, err = git.show(ref, _stdout=fp)
 
-            out = '# git cat-file blob {} >{}\n{}'.format(
-                shlex.quote(ref),
-                shlex.quote(model.filename),
-                output,
-            )
-            Interaction.command(
-                N_('Error Saving File'), 'git cat-file', status, out, err
-            )
+        out = '# git show {} >{}\n{}'.format(
+            shlex.quote(ref),
+            shlex.quote(model.filename),
+            output,
+        )
+        Interaction.command(N_('Error Saving File'), 'git show', status, out, err)
         if status != 0:
             return
 
