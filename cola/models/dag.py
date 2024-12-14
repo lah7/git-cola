@@ -300,6 +300,7 @@ class RepoReader:
 
     def get_worktree_commits(self):
         """A Commit object that represents unstaged modified changes in a worktree"""
+        return None, None
         if self.returncode != 0:
             return None, None
         context = self.context
