@@ -536,6 +536,11 @@ class BookmarksListView(QtWidgets.QListView):
             cmd = cmds.RemoveBookmark
         else:
             cmd = cmds.RemoveRecent
+            self.context.settings.remove_recent(item.path)
+            self.context.settings.save()
+            self.refresh()
+            return
+
         context = self.context
         ok, _, _, _ = cmds.do(cmd, context, item.path, item.name, icon=icons.discard())
         if ok:
