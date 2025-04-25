@@ -263,6 +263,12 @@ class StashView(standard.Dialog):
             cmds.do(stash.SaveStash, context, stash_name, keep_index)
         self.update_from_model()
 
+        # Rename the stash to remove the prepended "On <branch>" default prefix.
+        stashes, revids, author_dates, names = self.model.stash_info()
+        if stashes and names[0] != stash_name:
+            cmds.do(stash.RenameStash, context, revids[0], stash_name)
+            self.update_from_model()
+
     def stash_drop(self):
         """Drops the currently selected stash"""
         selection = self.selected_stash()
