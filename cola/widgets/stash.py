@@ -191,7 +191,15 @@ class StashView(standard.Dialog):
         self.names = names
 
         self.stash_list.clear()
-        self.stash_list.addItems(self.stashes)
+        # Show the stash message/name without the "stash@{N}: " prefix
+        def strip_prefix(stash):
+            import re
+            m = re.match(r"stash@\{\d+\}:\s*(.*)", stash)
+            return m.group(1) if m else stash
+
+        display_stashes = [strip_prefix(s) for s in self.stashes]
+        self.stash_list.addItems(display_stashes)
+
         if self.stash_list.count() > 0:
             for i in range(self.stash_list.count()):
                 self.stash_list.item(i).setToolTip(author_dates[i])
