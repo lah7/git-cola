@@ -79,6 +79,39 @@ class StashView(standard.Dialog):
             text=N_('Stash Index'), tooltip=N_('Stash staged changes only')
         )
 
+        # Create "Stash" menu with three options, using checkboxes as a proxy
+        self.keep_index.setVisible(False)
+        self.stash_index.setVisible(False)
+
+        self.stash_menu = qtutils.create_menu(N_('Stash'), self)
+        self.stash_menu.setIcon(icons.stash())
+
+        self.action_stash_all = self.stash_menu.addAction(N_('All changes'))
+        self.action_stash_staged = self.stash_menu.addAction(N_('Staged only'))
+        self.action_stash_unstaged = self.stash_menu.addAction(N_('Unstaged only'))
+
+        def set_stash_staged():
+            self.stash_index.setChecked(True)
+            self.keep_index.setChecked(False)
+            self.button_save.click()
+
+        def set_stash_unstaged():
+            self.stash_index.setChecked(False)
+            self.keep_index.setChecked(True)
+            self.button_save.click()
+
+        def set_stash_all():
+            self.stash_index.setChecked(False)
+            self.keep_index.setChecked(False)
+            self.button_save.click()
+
+        self.action_stash_staged.triggered.connect(set_stash_staged)
+        self.action_stash_unstaged.triggered.connect(set_stash_unstaged)
+        self.action_stash_all.triggered.connect(set_stash_all)
+
+        self.button_stash_menu = qtutils.create_button(text=N_('Stash...'), icon=icons.stash())
+        self.button_stash_menu.setMenu(self.stash_menu)
+
         # Arrange layouts
         self.splitter = qtutils.splitter(
             Qt.Horizontal, self.stash_list, self.stash_text
@@ -88,15 +121,13 @@ class StashView(standard.Dialog):
         self.btn_layt = qtutils.hbox(
             defs.no_margin,
             defs.button_spacing,
-            self.stash_index,
-            self.keep_index,
+            self.button_stash_menu,
+            self.button_rename,
+            self.button_drop,
             qtutils.STRETCH,
             self.button_close,
-            self.button_save,
-            self.button_rename,
             self.button_apply,
             self.button_pop,
-            self.button_drop,
         )
 
         self.main_layt = qtutils.vbox(
