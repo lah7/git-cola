@@ -130,6 +130,7 @@ class CommitMessageEditor(QtWidgets.QFrame):
         self.actions_button = qtutils.create_toolbutton(
             icon=icons.configure(), tooltip=N_('Actions...')
         )
+        self.actions_button.setCheckable(True)
         self.actions_button.setMenu(self.actions_menu)
         self.actions_button.setStyleSheet("")
 
@@ -532,8 +533,10 @@ class CommitMessageEditor(QtWidgets.QFrame):
 
         if author_visible or date_visible:
             self.actions_button.setIcon(icons.gear_solid())
+            self.actions_button.setChecked(True)
         else:
             self.actions_button.setIcon(icons.configure())
+            self.actions_button.setChecked(False)
 
     def commit(self):
         """Attempt to create a commit from the index and commit message."""
