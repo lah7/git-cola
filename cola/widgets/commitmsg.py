@@ -223,6 +223,20 @@ class CommitMessageEditor(QtWidgets.QFrame):
         )
         self._date_label = qtutils.plain_text_label(tooltip=tooltip, parent=self)
 
+        for widget in [self._author_image, self._author_label, self._date_image, self._date_label]:
+            widget.setDisabled(True)
+            if isinstance(widget, QtWidgets.QLabel):
+                pixmap = widget.pixmap()
+                if isinstance(pixmap, QtGui.QPixmap) and not pixmap.isNull():
+                    # Make the icon look disabled by setting its opacity
+                    disabled_pixmap = pixmap.copy()
+                    painter = QtGui.QPainter()
+                    if painter.begin(disabled_pixmap):
+                        painter.setCompositionMode(QtGui.QPainter.CompositionMode_DestinationIn)
+                        painter.fillRect(disabled_pixmap.rect(), QtGui.QColor(0, 0, 0, 100))
+                        painter.end()
+                    widget.setPixmap(disabled_pixmap)
+
         self.bottomlayout = qtutils.hbox(
             defs.no_margin,
             defs.spacing,
