@@ -246,10 +246,11 @@ class CommitMessageEditor(QtWidgets.QFrame):
             self.commit_button,
         )
         self.topwidget = QtWidgets.QWidget()
+        self.setContentsMargins(4, 0, 4, 0)
         self.topwidget.setLayout(self.toplayout)
 
         self.mainlayout = qtutils.vbox(
-            defs.no_margin, defs.spacing, self.description, self.bottomlayout
+            defs.no_margin, defs.spacing, self.topwidget, self.description, self.bottomlayout
         )
         self.setLayout(self.mainlayout)
 
