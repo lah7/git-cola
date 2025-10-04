@@ -867,7 +867,6 @@ def create_button(
 ) -> QtWidgets.QPushButton:
     """Create a button, set its title, and add it to the parent."""
     button = QtWidgets.QPushButton()
-    button.setCursor(Qt.PointingHandCursor)
     button.setFocusPolicy(Qt.NoFocus)
     if text:
         button.setText(' ' + text)
