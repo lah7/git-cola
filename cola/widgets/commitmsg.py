@@ -4,7 +4,7 @@ from functools import partial
 from qtpy import QtCore
 from qtpy import QtGui
 from qtpy import QtWidgets
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QMimeData
 from qtpy.QtCore import Signal
 
 from .. import actions
@@ -1283,3 +1283,24 @@ class CommitMessageTextEdit(SpellCheckTextEdit):
         SpellCheckTextEdit.setFont(self, font)
         width, height = qtutils.text_size(font, 'MMMM')
         self.setMinimumSize(QtCore.QSize(width, height * 2))
+
+    def insertFromMimeData(self, source: QMimeData):
+        """Handle paste events and replace any GitHub links with short ones"""
+        if source.hasText():
+            text = source.text()
+            if text.startswith("https://github.com"):
+                if text.find("/issues/") > 0:
+                    parts = text.split("/issues/")
+                elif text.find("/pull/") > 0:
+                    parts = text.split("/pull/")
+                else:
+                    parts = []
+
+                if parts:
+                    name = parts[0].split("/", 3)[-1]
+                    issue = parts[1]
+                    new_source = QMimeData()
+                    new_source.setText(f"{name}#{issue}")
+                    source = new_source
+
+        super().insertFromMimeData(source)
