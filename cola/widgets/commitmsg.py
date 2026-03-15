@@ -152,17 +152,20 @@ class CommitMessageEditor(QtWidgets.QFrame):
 
         # Commit Date
         self.commit_date_action = self.actions_menu.addAction(N_('Set Commit Date'))
+        self.commit_date_action.setIcon(icons.calendar())
         self.commit_date_action.setCheckable(True)
         self.commit_date_action.setChecked(False)
         qtutils.connect_action_bool(self.commit_date_action, self.set_commit_date)
 
         # Commit Author
         self.commit_author_action = self.actions_menu.addAction(N_('Set Commit Author'))
+        self.commit_author_action.setIcon(icons.user())
         self.commit_author_action.setCheckable(True)
         self.commit_author_action.setChecked(False)
         qtutils.connect_action_bool(self.commit_author_action, self.set_commit_author)
 
         # Bypass hooks
+        self.actions_menu.addSeparator()
         self.bypass_commit_hooks_action = self.actions_menu.addAction(
             N_('Bypass Commit Hooks')
         )
@@ -181,11 +184,13 @@ class CommitMessageEditor(QtWidgets.QFrame):
         spell_check = prefs.spellcheck(context)
         self.check_spelling_action.setChecked(spell_check)
         self.toggle_check_spelling(spell_check)
+        self.check_spelling_action.setVisible(False)
 
         # Line wrapping
         self.autowrap_action = self.actions_menu.addAction(N_('Auto-Wrap Lines'))
         self.autowrap_action.setCheckable(True)
         self.autowrap_action.setChecked(prefs.linebreak(context))
+        self.autowrap_action.setVisible(False)
 
         # Commit message
         self.actions_menu.addSeparator()
