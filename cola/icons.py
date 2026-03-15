@@ -148,6 +148,16 @@ def status(filename: str, deleted: bool, is_staged: bool, untracked: bool) -> st
 # Icons creators and SVG file references
 
 
+def calendar():
+    """Commit date icon"""
+    return from_theme('view-history-symbolic')
+
+
+def user():
+    """Commit author icon"""
+    return from_theme('im-user', fallback='three-bars.svg')
+
+
 def three_bars() -> QtGui.QIcon:
     """Three-bars icon"""
     return from_theme('view-list-text', fallback='three-bars.svg')
