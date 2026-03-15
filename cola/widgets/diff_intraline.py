@@ -68,34 +68,26 @@ class IntralineStyleSet:
 
         stronger_added_background = adjust_hsl(
             self.added_line_background,
-            sat_ratio=+0.95,
-            light_ratio=-0.10,
+            sat_ratio=+0.25,
+            light_ratio=0,
         )
         stronger_removed_background = adjust_hsl(
             self.removed_line_background,
-            sat_ratio=+0.95,
-            light_ratio=-0.10,
+            sat_ratio=+0.25,
+            light_ratio=0,
         )
         unchanged_added_background = adjust_hsl(
             self.added_line_background,
-            sat_ratio=-0.45,
+            sat_ratio=0,
             light_ratio=+0.00,
         )
         unchanged_removed_background = adjust_hsl(
             self.removed_line_background,
-            sat_ratio=-0.45,
+            sat_ratio=0,
             light_ratio=+0.00,
         )
-        replaced_added_background = mix_hsl(
-            self.replacement_background_seed,
-            stronger_added_background,
-            hue_r=+0.05,
-        )
-        replaced_removed_background = mix_hsl(
-            self.replacement_background_seed,
-            stronger_removed_background,
-            hue_r=+0.05,
-        )
+        replaced_added_background = stronger_added_background
+        replaced_removed_background = stronger_removed_background
 
         self.added_inserted_format = qtutils.make_format(
             foreground=self.text_foreground,
