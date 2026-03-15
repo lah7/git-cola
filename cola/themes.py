@@ -51,6 +51,7 @@ class Theme:
         self.palette: QPalette | None = None
 
     def build_style_sheet(self, app_palette: QPalette, bold_fonts: bool) -> str:
+        return
         if self.style_sheet == EStylesheet.CUSTOM:
             return self.style_sheet_custom(app_palette, bold_fonts)
         if self.style_sheet == EStylesheet.FLAT:
@@ -579,6 +580,7 @@ class Theme:
 
 
 def style_sheet_default(palette: QPalette, bold_fonts: bool) -> str:
+    return
     highlight = palette.color(QtGui.QPalette.Highlight)
     shadow = palette.color(QtGui.QPalette.Shadow)
     base = palette.color(QtGui.QPalette.Base)
