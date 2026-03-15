@@ -150,7 +150,7 @@ def status(filename: str, deleted: bool, is_staged: bool, untracked: bool) -> st
 
 def three_bars() -> QtGui.QIcon:
     """Three-bars icon"""
-    return icon('three-bars.svg')
+    return from_theme('view-list-text', fallback='three-bars.svg')
 
 
 def add() -> QtGui.QIcon:
@@ -160,17 +160,17 @@ def add() -> QtGui.QIcon:
 
 def alphabetical() -> QtGui.QIcon:
     """Alphabetical icon"""
-    return from_theme('view-sort', fallback='a-z-order.svg')
+    return from_theme('view-sort-ascending', fallback='a-z-order.svg')
 
 
 def branch() -> QtGui.QIcon:
     """Branch icon"""
-    return icon('git-branch.svg')
+    return from_theme('vcs-branch', fallback='git-branch.svg')
 
 
 def check_name() -> str:
     """Check mark icon name"""
-    return name_from_basename('check.svg')
+    return from_theme('checkmark', fallback='check.svg')
 
 
 def cherry_pick() -> QtGui.QIcon:
@@ -185,12 +185,12 @@ def circle_slash_red() -> QtGui.QIcon:
 
 def clock() -> QtGui.QIcon:
     """A clock icon"""
-    return icon('clock-fill.svg')
+    return from_theme("clock", fallback='clock-fill.svg')
 
 
 def close() -> QtGui.QIcon:
     """Close icon"""
-    return icon('x.svg')
+    return icon('window-close.svg')
 
 
 def cola() -> QtGui.QIcon:
@@ -200,17 +200,22 @@ def cola() -> QtGui.QIcon:
 
 def commit() -> QtGui.QIcon:
     """Commit icon"""
-    return icon('document-save-symbolic.svg')
+    return from_theme('vcs-commit', fallback='document-save-symbolic.svg')
+
+
+def stash():
+    """Stash icon"""
+    return from_theme('edit-clear-history-symbolic', fallback='document-save-symbolic.svg') # vcs-stash, folder-stash
 
 
 def compare() -> QtGui.QIcon:
     """Compare icon"""
-    return icon('git-compare.svg')
+    return from_theme('kr_comparedirs', fallback='git-compare.svg')
 
 
 def configure() -> QtGui.QIcon:
     """Configure icon"""
-    return icon('gear.svg')
+    return from_theme('configure-symbolic', fallback='gear.svg')
 
 
 def cut() -> QtGui.QIcon:
@@ -230,7 +235,7 @@ def paste() -> QtGui.QIcon:
 
 def play() -> QtGui.QIcon:
     """Play icon"""
-    return icon('play.svg')
+    return from_theme('media-playback-start', fallback='play.svg')
 
 
 def delete() -> QtGui.QIcon:
@@ -238,9 +243,14 @@ def delete() -> QtGui.QIcon:
     return from_theme('edit-delete', fallback='trashcan.svg')
 
 
+def delete_branch():
+    """Delete icon for branches"""
+    return from_theme('vcs-branch-delete', fallback='trashcan.svg')
+
+
 def default_app() -> QtGui.QIcon:
     """Default app icon"""
-    return icon('telescope.svg')
+    return from_theme('system-run', fallback='telescope.svg')
 
 
 def dot_name() -> str:
@@ -250,7 +260,7 @@ def dot_name() -> str:
 
 def download() -> QtGui.QIcon:
     """Download icon"""
-    return icon('file-download.svg')
+    return from_theme('download-symbolic', fallback='file-download.svg')
 
 
 def discard() -> QtGui.QIcon:
@@ -275,7 +285,7 @@ def directory() -> QtGui.QIcon:
 
 def diff() -> QtGui.QIcon:
     """Diff icon"""
-    return icon('diff.svg')
+    return from_theme('vcs-diff', fallback='diff.svg')
 
 
 def edit() -> QtGui.QIcon:
@@ -285,47 +295,47 @@ def edit() -> QtGui.QIcon:
 
 def ellipsis() -> QtGui.QIcon:
     """Ellipsis icon"""
-    return icon('ellipsis.svg')
+    return from_theme('view-filter', fallback='ellipsis.svg')
 
 
 def external() -> QtGui.QIcon:
     """External link icon"""
-    return icon('link-external.svg')
+    return from_theme('link', fallback='link-external.svg')
 
 
 def file_code() -> QtGui.QIcon:
     """Code file icon"""
-    return icon('file-code.svg')
+    return from_theme('text-xml', fallback='file-code.svg')
 
 
 def file_text() -> QtGui.QIcon:
     """Text file icon"""
-    return icon('file-text.svg')
+    return from_theme('text-plain', fallback='file-text.svg')
 
 
 def file_zip() -> QtGui.QIcon:
     """Zip file / tarball icon"""
-    return icon('file-zip.svg')
+    return from_theme('application-x-zip', fallback='file-zip.svg')
 
 
 def fold() -> QtGui.QIcon:
     """Fold icon"""
-    return icon('fold.svg')
+    return from_theme('collapse', fallback='fold.svg')
 
 
 def gear_solid() -> QtGui.QIcon:
     """Configure icon"""
-    return icon('gear-solid.svg')
+    return from_theme('document-edit')
 
 
 def merge() -> QtGui.QIcon:
     """Merge icon"""
-    return icon('git-merge.svg')
+    return from_theme('vcs-merge-request', fallback='git-merge.svg')
 
 
 def modified() -> QtGui.QIcon:
     """Modified icon"""
-    return icon('modified.svg')
+    return from_theme('modified-symbolic', fallback='modified.svg')
 
 
 def modified_name() -> str:
@@ -360,12 +370,12 @@ def open_directory() -> QtGui.QIcon:
 
 def up() -> QtGui.QIcon:
     """Previous icon"""
-    return icon('arrow-up.svg')
+    return from_theme('arrow-up', fallback='arrow-up.svg')
 
 
 def down() -> QtGui.QIcon:
     """Go to next item icon"""
-    return icon('arrow-down.svg')
+    return from_theme('arrow-down', fallback='arrow-down.svg')
 
 
 def partial_name() -> str:
@@ -375,22 +385,27 @@ def partial_name() -> str:
 
 def person() -> QtGui.QIcon:
     """Person icon"""
-    return icon('person-fill.svg')
+    return from_theme("user", fallback='person-fill.svg')
 
 
 def pull() -> QtGui.QIcon:
     """Pull icon"""
-    return icon('repo-pull.svg')
+    return from_theme('vcs-update-cvs-cervisia', fallback='repo-pull.svg') # vcs-pull, vcs-update-cvs-cervisia, download-later-symbolic
 
 
 def push() -> QtGui.QIcon:
     """Push icon"""
-    return icon('repo-push.svg')
+    return from_theme('vcs-commit-cvs-cervisia', fallback='repo-push.svg') # vcs-push, vcs-commit-cvs-cervisia, upload-later-symbolic
+
+
+def fetch():
+    """Push icon"""
+    return from_theme('view-refresh-symbolic', fallback='repo-push.svg') # cloud-download
 
 
 def question() -> QtGui.QIcon:
     """Question icon"""
-    return icon('question.svg')
+    return from_theme('question', fallback='question.svg')
 
 
 def remove() -> QtGui.QIcon:
@@ -400,12 +415,12 @@ def remove() -> QtGui.QIcon:
 
 def repo() -> QtGui.QIcon:
     """Repository icon"""
-    return icon('repo.svg')
+    return from_theme('folder-symbolic', fallback='repo.svg')
 
 
 def reverse_chronological() -> QtGui.QIcon:
     """Reverse chronological icon"""
-    return icon('last-first-order.svg')
+    return from_theme('view-sort-descending', fallback='last-first-order.svg')
 
 
 def save() -> QtGui.QIcon:
@@ -440,17 +455,17 @@ def star() -> QtGui.QIcon:
 
 def sync() -> QtGui.QIcon:
     """Sync/update icon"""
-    return icon('sync.svg')
+    return from_theme('view-refresh-symbolic', fallback='sync.svg')
 
 
 def tag() -> QtGui.QIcon:
     """Tag icon"""
-    return icon('tag.svg')
+    return from_theme('tag', fallback='tag.svg')
 
 
 def terminal() -> QtGui.QIcon:
     """Terminal icon"""
-    return icon('terminal.svg')
+    return from_theme('utilities-terminal-symbolic', fallback='terminal.svg')
 
 
 def undo() -> QtGui.QIcon:
@@ -480,7 +495,7 @@ def style_dialog_reset() -> QtGui.QIcon:
 
 def unfold() -> QtGui.QIcon:
     """Expand/unfold icon"""
-    return icon('unfold.svg')
+    return from_theme('expand', fallback='unfold.svg')
 
 
 def visualize() -> QtGui.QIcon:
