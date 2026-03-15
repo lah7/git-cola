@@ -227,10 +227,6 @@ class ColaApplication:
         theme = themes.find_theme(theme_str)
         self.theme = theme
 
-        bold_fonts = self.context.cfg.get('cola.boldfonts', default=False)
-        theme_stylesheet = theme.build_style_sheet(self._app.palette(), bold_fonts)
-        self._app.setStyleSheet(theme_stylesheet)
-
         is_macos_theme = theme_str.startswith('macos-')
         if is_macos_theme:
             themes.apply_platform_theme(theme_str)
