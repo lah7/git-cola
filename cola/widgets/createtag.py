@@ -29,7 +29,6 @@ def create_tag(context, name='', ref='', sign=False):
         parent=qtutils.active_window(),
     )
     view.show()
-    view.raise_()
     return view
 
 

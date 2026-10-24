@@ -598,13 +598,29 @@ class Dialog(WidgetMixin, QtWidgets.QDialog):
     Base = QtWidgets.QDialog
 
     def __init__(self, parent=None):
+        if parent is None:
+            # A transient parent lets Wayland/KWin classify this as a dialog.
+            parent = qtutils.active_window()
+        if parent is not None:
+            # Floating toolbars and popups are poor transient parents.
+            parent = parent.window()
+            if parent.windowType() in (Qt.Tool, Qt.Popup):
+                parent = None
+        if parent is None:
+            for widget in QtWidgets.QApplication.topLevelWidgets():
+                if isinstance(widget, QtWidgets.QMainWindow) and widget.isVisible():
+                    parent = widget
+                    break
         QtWidgets.QDialog.__init__(self, parent)
         WidgetMixin.__init__(self)
+
+        # Ensure the window type is explicitly Dialog for window managers
+        flags = self.windowFlags() | Qt.Dialog
+
         # Disable the Help button hint on Windows
         if hasattr(Qt, 'WindowContextHelpButtonHint'):
-            help_hint = Qt.WindowContextHelpButtonHint
-            flags = self.windowFlags() & ~help_hint
-            self.setWindowFlags(flags)
+            flags &= ~Qt.WindowContextHelpButtonHint
+        self.setWindowFlags(flags)
 
     def accept(self):
         self.save_settings()
