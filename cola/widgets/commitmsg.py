@@ -26,8 +26,8 @@ from ..qtutils import get
 from . import defs
 from . import standard
 from .selectcommits import select_commits
-from .spellcheck import SpellCheckLineEdit
 from .spellcheck import SpellCheckTextEdit
+from .text import LineEdit
 from .text import event_anchor_mode
 from .text import is_shift_pressed
 
@@ -99,7 +99,7 @@ class CommitMessageEditor(QtWidgets.QFrame):
         ]
 
         # Widgets
-        self.summary = CommitSummaryLineEdit(context, check=self.spellcheck)
+        self.summary = CommitSummaryLineEdit(context)
         self.summary.menu_actions.extend(menu_actions)
         self.summary.addAction(self.commit_action)
         self.summary.addAction(self.move_up)
@@ -744,7 +744,6 @@ class CommitMessageEditor(QtWidgets.QFrame):
             spell_check.add_word('Closes')
             spell_check.add_word('Fixes')
 
-        self.summary.highlighter.enable(enabled)
         self.description.highlighter.enable(enabled)
 
     def show_cursor_position(self, rows, cols):
@@ -1178,15 +1177,16 @@ existing commit by that author (i.e. rev-list --all -i --author=<author>);"""
         self._author_combobox.set_current_value(_get_default_author(self.context))
 
 
-class CommitSummaryLineEdit(SpellCheckLineEdit):
+class CommitSummaryLineEdit(LineEdit):
     """Text input field for the commit summary"""
 
     down_pressed = Signal()
     accepted = Signal()
 
-    def __init__(self, context, check=None, parent=None):
-        hint = N_('Commit summary')
-        SpellCheckLineEdit.__init__(self, context, hint, check=check, parent=parent)
+    def __init__(self, context, parent=None):
+        super().__init__(parent)
+        self.context = context
+        self.setPlaceholderText(N_('Commit summary'))
         self._comment_char = None
         self._refresh_config()
 
@@ -1201,8 +1201,7 @@ class CommitSummaryLineEdit(SpellCheckLineEdit):
         """Prevent commit messages from starting with comment characters"""
         value = self.get()
         if self._comment_char and value.lstrip().startswith(self._comment_char):
-            cursor = self.textCursor()
-            position = cursor.position()
+            position = self.cursorPosition()
 
             value = value.lstrip()
             if self._comment_char:
@@ -1213,19 +1212,29 @@ class CommitSummaryLineEdit(SpellCheckLineEdit):
 
             if position > 1:
                 position = utils.clamp_zero(position - 1, len(value))
-                cursor.setPosition(position)
-                self.setTextCursor(cursor)
+                self.setCursorPosition(position)
+
+    def contextMenuEvent(self, event):
+        menu = self.createStandardContextMenu()
+        qtutils.add_menu_actions(menu, self.menu_actions)
+        menu.exec_(event.globalPos())
 
     def keyPressEvent(self, event):
-        """Allow "Enter" to focus into the extended description field"""
-        event_key = event.key()
-        if event_key in (
-            Qt.Key_Enter,
-            Qt.Key_Return,
-        ):
+        key = event.key()
+        if key in (Qt.Key_Enter, Qt.Key_Return):
             self.accepted.emit()
             return
-        SpellCheckLineEdit.keyPressEvent(self, event)
+        if key == Qt.Key_Up:
+            self.home(is_shift_pressed(event))
+            return
+        if key == Qt.Key_Down:
+            if self.cursorPosition() == len(self.text()):
+                self.deselect()
+                self.down_pressed.emit()
+            else:
+                self.end(is_shift_pressed(event))
+            return
+        super().keyPressEvent(event)
 
 
 class CommitMessageTextEdit(SpellCheckTextEdit):

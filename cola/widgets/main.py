@@ -1020,11 +1020,8 @@ class MainView(standard.MainWindow):
         QtCore.QTimer.singleShot(0, self.initialize)
 
     def _initialize_connections(self):
-        self.commiteditor.summary.undoAvailable.connect(
-            partial(self._update_can_undo_message, self.commiteditor.summary)
-        )
-        self.commiteditor.summary.redoAvailable.connect(
-            partial(self._update_can_redo_message, self.commiteditor.summary)
+        self.commiteditor.summary.textChanged.connect(
+            self._update_undo_redo_message_actions
         )
         self.commiteditor.description.undoAvailable.connect(
             partial(self._update_can_undo_message, self.commiteditor.description)
@@ -1115,8 +1112,12 @@ class MainView(standard.MainWindow):
 
     def _update_undo_redo_message_actions(self):
         focus = self.edit_proxy.focus()
-        can_undo = self._can_undo_message.get(id(focus), False)
-        can_redo = self._can_redo_message.get(id(focus), False)
+        if focus is self.commiteditor.summary:
+            can_undo = focus.isUndoAvailable()
+            can_redo = focus.isRedoAvailable()
+        else:
+            can_undo = self._can_undo_message.get(id(focus), False)
+            can_redo = self._can_redo_message.get(id(focus), False)
         self.undo_message_action.setEnabled(can_undo)
         self.redo_message_action.setEnabled(can_redo)
 
