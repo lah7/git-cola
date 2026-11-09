@@ -2120,6 +2120,7 @@ class EdgeColor:
 
     current_color_index = 0
     colors = (
+        QtGui.QColor(Qt.darkGreen),
         QtGui.QColor(Qt.red),
         QtGui.QColor(Qt.cyan),
         QtGui.QColor(Qt.magenta),
@@ -2131,6 +2132,7 @@ class EdgeColor:
     @classmethod
     def update_colors(cls, theme):
         """Update the colors based on the color theme"""
+        theme.is_dark = True
         if theme.is_dark or theme.is_palette_dark:
             cls.colors += (
                 QtGui.QColor(Qt.red).lighter(),
@@ -2147,7 +2149,6 @@ class EdgeColor:
                 QtGui.QColor(Qt.darkMagenta),
                 QtGui.QColor(Qt.darkGreen),
                 QtGui.QColor(Qt.darkYellow),
-                QtGui.QColor(Qt.darkBlue),
             )
 
     @classmethod
