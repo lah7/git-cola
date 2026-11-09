@@ -433,7 +433,7 @@ class MainView(standard.MainWindow):
 
         self.stash_action = qtutils.add_action_with_icon_and_tooltip(
             self,
-            icons.commit(),
+            icons.stash(),
             N_('Stash...'),
             N_('Temporarily stash away uncommitted changes using "git stash"'),
             partial(stash.view, context),
@@ -591,14 +591,14 @@ class MainView(standard.MainWindow):
 
         self.delete_branch_action = qtutils.add_action_with_icon(
             self,
-            icons.discard(),
+            icons.delete_branch(),
             N_('Delete...'),
             partial(guicmds.delete_branch, context),
         )
 
         self.delete_remote_branch_action = qtutils.add_action_with_icon(
             self,
-            icons.discard(),
+            icons.delete_branch(),
             N_('Delete Remote Branch...'),
             partial(guicmds.delete_remote_branch, context),
         )
