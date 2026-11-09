@@ -1106,7 +1106,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         height = option.fontMetrics.height()
         return QtCore.QSize(total_width, height)
 
-    def _label_hit_test(
+    def label_hit_test(
         self,
         pos,
         rect: QtCore.QRectF,
@@ -1150,7 +1150,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         if item is None:
             self.set_hover(None, -1)
             return
-        label_idx, is_condensed = self._label_hit_test(
+        label_idx, is_condensed = self.label_hit_test(
             pos, rect, font_metrics, index, item
         )
         if label_idx >= 0 and is_condensed is not None:
@@ -1436,6 +1436,16 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         if event.button() == Qt.RightButton:
             event.accept()
             return
+        if (event.button() == Qt.LeftButton and item is not None and not self.isColumnHidden(CommitTreeWidgetItem.GRAPH)):
+            index = self.indexFromItem(item, CommitTreeWidgetItem.GRAPH)
+            rect = self.visualRect(index)
+            if rect.contains(event.pos()):
+                label_idx, _ = self.graph_delegate.label_hit_test(
+                    event.pos(), rect, self.fontMetrics(), index, item
+                )
+                if label_idx >= 0:
+                    label = _prepare_labels(item.commit.tags)[label_idx][1]
+                    qtutils.set_clipboard(label)
         QtWidgets.QTreeWidget.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent):
