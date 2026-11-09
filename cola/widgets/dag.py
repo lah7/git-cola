@@ -948,7 +948,13 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
             tree = self.parent()
             item = tree.itemFromIndex(index) if tree else None
             labels_width = self._draw_labels(
-                painter, mid_y, commit.tags, label_x, option.fontMetrics, item, dark
+                painter,
+                QtCore.QRectF(rect).center().y(),
+                commit.tags,
+                label_x,
+                option.fontMetrics,
+                item,
+                dark,
             )
 
         text = index.data(Qt.DisplayRole)
@@ -972,7 +978,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
     def _draw_labels(
         self,
         painter: QtGui.QPainter | None,
-        y: int,
+        y: float,
         tags: list[str],
         start_x: int,
         font_metrics: QtGui.QFontMetrics,
@@ -1009,19 +1015,26 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
             shown, text_width = self._label_shown_text(
                 condensed_text, display_text, font_metrics, item, i
             )
-            # Use 80% of font height for tighter vertical fit
-            text_height = font_metrics.height() * 0.8
+            text_height = font_metrics.height()
 
             text_rect = QtCore.QRectF(
                 current_x, y - text_height / 2, text_width, text_height
             )
 
-            box_rect = text_rect.adjusted(-x_offset, -y_offset, x_offset, y_offset)
+            box_height = text_height * 0.8 + y_offset * 2
+            box_rect = QtCore.QRectF(
+                current_x - x_offset,
+                y - box_height / 2,
+                text_width + x_offset * 2,
+                box_height,
+            )
 
             if painter is not None:
                 painter.drawRoundedRect(box_rect, self.LABEL_BORDER, self.LABEL_BORDER)
                 painter.save()
-                painter.setClipRect(box_rect)
+                painter.setClipRect(
+                    text_rect.adjusted(-x_offset, 0, x_offset, 0), Qt.IntersectClip
+                )
                 painter.drawText(text_rect, Qt.AlignLeft | Qt.AlignVCenter, shown)
                 painter.restore()
 
@@ -1109,7 +1122,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         prev_row = index.data(GRAPH_PREV_ROW_ROLE)
         x_offset = self.LABEL_TEXT_OFFSET
         current_x = rect.left() + self._graph_width(row, prev_row) + 8
-        mid_y = rect.center().y()
+        mid_y = QtCore.QRectF(rect).center().y()
         text_height = font_metrics.height() * 0.8 + self.LABEL_VERTICAL_OFFSET * 2
         for i, (_, display_text, condensed_text) in enumerate(
             _prepare_labels(commit.tags)
