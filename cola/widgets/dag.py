@@ -1146,10 +1146,10 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         font_metrics: QtGui.QFontMetrics,
         index: int,
         item: object | None,
-    ) -> None:
+    ) -> bool:
         if item is None:
             self.set_hover(None, -1)
-            return
+            return False
         label_idx, is_condensed = self.label_hit_test(
             pos, rect, font_metrics, index, item
         )
@@ -1157,6 +1157,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
             self.set_hover(item, label_idx)
         else:
             self.set_hover(None, -1)
+        return label_idx >= 0
 
 
 class CommitTreeWidgetItem(QtWidgets.QTreeWidgetItem):
@@ -1289,6 +1290,8 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             delegate = self.graph_delegate
         else:
             delegate = None
+            self.graph_delegate.set_hover(None, -1)
+            self.viewport().unsetCursor()
         self.setItemDelegateForColumn(CommitTreeWidgetItem.GRAPH, delegate)
         if not enabled and not was_hidden:
             self._graph_column_width = self.columnWidth(CommitTreeWidgetItem.GRAPH)
@@ -1457,13 +1460,19 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             else -1
         )
         rect = self.visualRect(index) if item is not None else QtCore.QRectF()
-        self.graph_delegate.update_label_hover(
-            pos, rect, self.fontMetrics(), index, item
+        label_item = (item if not self.isColumnHidden(CommitTreeWidgetItem.GRAPH) and rect.contains(pos) else None)
+        over_label = self.graph_delegate.update_label_hover(
+            pos, rect, self.fontMetrics(), index, label_item
         )
         QtWidgets.QTreeWidget.mouseMoveEvent(self, event)
+        if over_label:
+            self.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
+        else:
+            self.viewport().unsetCursor()
 
     def leaveEvent(self, event):
         self.graph_delegate.set_hover(None, -1)
+        self.viewport().unsetCursor()
         QtWidgets.QTreeWidget.leaveEvent(self, event)
 
 
