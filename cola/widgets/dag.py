@@ -712,6 +712,18 @@ _TAGS_PREFIX = 'tags/'
 _HEADS_PREFIX = 'heads/'
 
 
+def _is_dark_palette(palette):
+    return palette.color(QtGui.QPalette.Base).lightnessF() < 0.5
+
+
+def _ref_outline_color(tag):
+    if tag == 'HEAD' or tag.startswith(_TAGS_PREFIX):
+        return QtGui.QColor(Qt.yellow)
+    if tag.startswith(_REMOTES_PREFIX):
+        return QtGui.QColor(Qt.white)
+    return QtGui.QColor(Qt.green)
+
+
 class RefType(enum.Enum):
     LOCAL = 'local'
     REMOTE = 'remote'
@@ -850,6 +862,8 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
     def paint(self, painter, option, index):
         row = index.data(GRAPH_ROW_ROLE)
         prev_row = index.data(GRAPH_PREV_ROW_ROLE)
+        commit = index.data(COMMIT_ROLE)
+        dark = _is_dark_palette(option.palette)
 
         painter.save()
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
@@ -910,13 +924,20 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
                     GraphRowColor.MERGE: self.merge_color,
                     GraphRowColor.HEAD: self.current_head_color,
                 }
-                painter.setPen(self.outline_pen)
-                painter.setBrush(color_map[row.color])
+                if dark:
+                    tag = commit.tags[0] if commit and commit.tags else ''
+                    pen = QtGui.QPen(_ref_outline_color(tag))
+                    pen.setWidth(2)
+                    painter.setPen(pen)
+                else:
+                    painter.setPen(self.outline_pen)
+                color = color_map[row.color]
+                if dark and row.color == GraphRowColor.NORMAL:
+                    color = option.palette.base().color()
+                painter.setBrush(color)
                 painter.drawEllipse(
                     QtCore.QPointF(cx, mid_y), self.DOT_RADIUS, self.DOT_RADIUS
                 )
-
-        commit = index.data(COMMIT_ROLE)
 
         label_x = rect.left() + self._graph_width(row, prev_row) + 8
         labels_width = 0
@@ -926,7 +947,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
             tree = self.parent()
             item = tree.itemFromIndex(index) if tree else None
             labels_width = self._draw_labels(
-                painter, mid_y, commit.tags, label_x, option.fontMetrics, item
+                painter, mid_y, commit.tags, label_x, option.fontMetrics, item, dark
             )
 
         text = index.data(Qt.DisplayRole)
@@ -955,6 +976,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         start_x: int,
         font_metrics: QtGui.QFontMetrics,
         item: object | None,
+        dark: bool = False,
     ):
         """Draw branch/tag labels and return total width used."""
         current_x = start_x
@@ -976,8 +998,12 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
                 brush = self.head_color
 
             if painter is not None:
-                painter.setPen(pen)
-                painter.setBrush(brush)
+                if dark:
+                    painter.setPen(QtGui.QPen(brush))
+                    painter.setBrush(Qt.NoBrush)
+                else:
+                    painter.setPen(pen)
+                    painter.setBrush(brush)
 
             shown, text_width = self._label_shown_text(
                 condensed_text, display_text, font_metrics, item, i
@@ -2151,7 +2177,6 @@ class EdgeColor:
     @classmethod
     def update_colors(cls, theme):
         """Update the colors based on the color theme"""
-        theme.is_dark = True
         if theme.is_dark or theme.is_palette_dark:
             cls.colors += (
                 QtGui.QColor(Qt.red).lighter(),
@@ -2207,8 +2232,8 @@ class Commit(QtWidgets.QGraphicsItem):
     )
     inner_rect = inner_rect.boundingRect()
 
-    commit_color = QtGui.QColor(27, 30, 32)
-    outline_color = QtGui.QColor(Qt.green)
+    commit_color = QtGui.QColor(Qt.white)
+    outline_color = commit_color.darker()
     merge_color = QtGui.QColor(Qt.lightGray)
 
     commit_selected_color = QtGui.QColor(Qt.green)
@@ -2282,38 +2307,21 @@ class Commit(QtWidgets.QGraphicsItem):
         return self.item_shape
 
     def paint(self, painter, option, _widget):
-        # Change outline depending on commit (use first one)
-        if self.commit.tags:
-            tag = self.commit.tags[0]
+        palette = _widget.palette() if _widget else QtWidgets.QApplication.palette()
+        dark = _is_dark_palette(palette)
+        pen = QtGui.QPen(self.commit_pen)
+        brush = self.brush
+        if dark:
+            tag = self.commit.tags[0] if self.commit.tags else ''
+            pen.setColor(_ref_outline_color(tag))
+            if not self.isSelected() and len(self.commit.parents) <= 1:
+                brush = palette.color(QtGui.QPalette.Base)
 
-            HEAD = 'HEAD'
-            remotes_prefix = 'remotes/'
-            tags_prefix = 'tags/'
-            heads_prefix = 'heads/'
-
-            head_color = QtGui.QColor(Qt.green)
-            other_color = QtGui.QColor(Qt.white)
-            remote_color = QtGui.QColor(Qt.yellow)
-
-            if tag == HEAD:
-                self.commit_pen.setColor(remote_color)
-            elif tag.startswith(remotes_prefix):
-                self.commit_pen.setColor(other_color)
-            elif tag.startswith(tags_prefix):
-                self.commit_pen.setColor(remote_color)
-            elif tag.startswith(heads_prefix):
-                self.commit_pen.setColor(head_color)
-            else:
-                self.commit_pen.setColor(self.outline_color)
-        else:
-            self.commit_pen.setColor(self.outline_color)
-
-        # Do not draw outside the exposed rect
         painter.setClipRect(option.exposedRect)
 
         # Draw ellipse
-        painter.setPen(self.commit_pen)
-        painter.setBrush(self.brush)
+        painter.setPen(pen)
+        painter.setBrush(brush)
         painter.drawEllipse(self.inner_rect)
 
     def mousePressEvent(self, event):
@@ -2343,11 +2351,11 @@ class Label(QtWidgets.QGraphicsItem):
 
     head_pen = QtGui.QPen()
     head_pen.setColor(QtGui.QColor(Qt.black))
-    head_pen.setWidth(0)
+    head_pen.setWidth(1)
 
     text_pen = QtGui.QPen()
     text_pen.setColor(QtGui.QColor(Qt.black))
-    text_pen.setWidth(0)
+    text_pen.setWidth(1)
 
     border = 1
     item_spacing = 8
@@ -2422,24 +2430,32 @@ class Label(QtWidgets.QGraphicsItem):
         tags_len = len(tags_prefix)
         heads_len = len(heads_prefix)
 
-        def _set_outline_colour(painter, colour):
-            self.text_pen.setColor(colour)
-            painter.setPen(self.text_pen)
+        palette = _widget.palette() if _widget else QtWidgets.QApplication.palette()
+        dark = _is_dark_palette(palette)
 
         for tag in self.commit.tags:
             if tag == HEAD:
-                _set_outline_colour(painter, self.remote_color)
+                color = self.remote_color
             elif tag.startswith(remotes_prefix):
                 tag = tag[remotes_len:]
-                _set_outline_colour(painter, self.other_color)
+                color = self.other_color
             elif tag.startswith(tags_prefix):
                 tag = tag[tags_len:]
-                _set_outline_colour(painter, self.remote_color)
+                color = self.remote_color
             elif tag.startswith(heads_prefix):
                 tag = tag[heads_len:]
-                _set_outline_colour(painter, self.head_color)
+                color = self.head_color
             else:
-                _set_outline_colour(painter, self.other_color)
+                color = self.other_color
+
+            if dark:
+                pen = QtGui.QPen(color)
+                pen.setWidth(0)
+                painter.setPen(pen)
+                painter.setBrush(Qt.NoBrush)
+            else:
+                painter.setPen(self.text_pen)
+                painter.setBrush(color)
 
             text_rect = painter.boundingRect(
                 QRectF(current_width, 0, 0, 0), Qt.TextSingleLine, tag
