@@ -1740,27 +1740,6 @@ class CopyLeadingPathWidget(QtWidgets.QWidget):
         text_rgb, highlight_text_rgb = theme.text_colors_rgb()
         disabled_text_rgb = theme.disabled_text_color_rgb()
 
-        stylesheet = f"""
-            * {{
-                show-decoration-selected: 1
-            }}
-            QLabel {{
-                color: {text_rgb};
-                show-decoration-selected: 1
-            }}
-            QLabel:hover {{
-                color: {highlight_text_rgb};
-                background-color: {highlight_rgb};
-                background-clip: padding;
-                show-decoration-selected: 1
-            }}
-            QLabel:disabled {{
-                color: {disabled_text_rgb};
-            }}
-        """
-
-        self.setStyleSheet(stylesheet)
-
     def value(self):
         """Return the current value of the spin-box"""
         return self.spinbox.value()
