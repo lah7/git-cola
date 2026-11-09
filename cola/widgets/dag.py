@@ -1162,6 +1162,8 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         self.setHeaderLabels(
             [N_('Summary'), N_('Author'), N_('Date, Time'), N_('Graph')]
         )
+        self.header().setStretchLastSection(False)
+        self.header().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         self.header().setSectionResizeMode(
             CommitTreeWidgetItem.GRAPH, QtWidgets.QHeaderView.Stretch
         )
@@ -1173,6 +1175,7 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         self.selecting = False
         self.commits = []
         self._column_init_state = ColumnInitState.NONE
+        self._graph_column_width = 160
         self.action_up = qtutils.add_action(
             self, N_('Go Up'), self.go_up, hotkeys.MOVE_UP
         )
@@ -1197,7 +1200,10 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         # The base class method is intentionally overridden because we only
         # care about the details below for this sub-widget.
         state = {}
-        state['column_widths'] = self.column_widths()
+        widths = self.column_widths()
+        if self.isColumnHidden(CommitTreeWidgetItem.GRAPH):
+            widths[CommitTreeWidgetItem.GRAPH] = self._graph_column_width
+        state['column_widths'] = widths
         return state
 
     def apply_state(self, state):
@@ -1207,11 +1213,15 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         except (KeyError, ValueError):
             column_widths = None
         if column_widths:
-            # We only care about the first three columns. This allows the final
-            # column to stretch and shrink.
-            count = 3 if len(column_widths) >= 4 else 2
-            self.set_column_widths(column_widths[:count])
-            if count == 2:
+            if len(column_widths) >= 4:
+                self._graph_column_width = column_widths[CommitTreeWidgetItem.GRAPH]
+                self.set_column_widths(column_widths[:3])
+                if not self.isColumnHidden(CommitTreeWidgetItem.GRAPH):
+                    self.setColumnWidth(
+                        CommitTreeWidgetItem.GRAPH, self._graph_column_width
+                    )
+            else:
+                self.set_column_widths(column_widths[:2])
                 self.setColumnWidth(CommitTreeWidgetItem.DATE, 160)
             self._column_init_state = ColumnInitState.SHOW_EVENT
         return True
@@ -1228,15 +1238,23 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             self.setColumnWidth(CommitTreeWidgetItem.SUMMARY, width * 2 // 5)
             self.setColumnWidth(CommitTreeWidgetItem.AUTHOR, width // 6)
             self.setColumnWidth(CommitTreeWidgetItem.DATE, width // 5)
+            self._graph_column_width = width // 4
+            if not self.isColumnHidden(CommitTreeWidgetItem.GRAPH):
+                self.setColumnWidth(CommitTreeWidgetItem.GRAPH, self._graph_column_width)
 
     def display_inline_graph(self, enabled):
         """Enable and disable the display of inline graph in the commit list"""
+        was_hidden = self.isColumnHidden(CommitTreeWidgetItem.GRAPH)
         if enabled:
             delegate = self.graph_delegate
         else:
             delegate = None
         self.setItemDelegateForColumn(CommitTreeWidgetItem.GRAPH, delegate)
+        if not enabled and not was_hidden:
+            self._graph_column_width = self.columnWidth(CommitTreeWidgetItem.GRAPH)
         self.setColumnHidden(CommitTreeWidgetItem.GRAPH, not enabled)
+        if enabled and was_hidden:
+            self.setColumnWidth(CommitTreeWidgetItem.GRAPH, self._graph_column_width)
 
     # ViewerMixin
     def go_up(self):
