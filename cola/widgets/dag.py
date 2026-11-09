@@ -820,7 +820,8 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
     LABEL_BORDER = 3
     LABEL_SPACING = 4
-    LABEL_TEXT_OFFSET = 2
+    LABEL_TEXT_OFFSET = 3
+    LABEL_VERTICAL_OFFSET = 1
     ANIMATION_DURATION = 50
 
     def __init__(self, parent=None) -> None:
@@ -981,7 +982,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         """Draw branch/tag labels and return total width used."""
         current_x = start_x
         x_offset = self.LABEL_TEXT_OFFSET
-        y_offset = 0
+        y_offset = self.LABEL_VERTICAL_OFFSET
 
         for i, (tag, display_text, condensed_text) in enumerate(_prepare_labels(tags)):
             pen = self.text_pen
@@ -1109,7 +1110,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         x_offset = self.LABEL_TEXT_OFFSET
         current_x = rect.left() + self._graph_width(row, prev_row) + 8
         mid_y = rect.center().y()
-        text_height = font_metrics.height()
+        text_height = font_metrics.height() * 0.8 + self.LABEL_VERTICAL_OFFSET * 2
         for i, (_, display_text, condensed_text) in enumerate(
             _prepare_labels(commit.tags)
         ):
