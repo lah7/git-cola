@@ -1125,6 +1125,7 @@ class CommitTreeWidgetItem(QtWidgets.QTreeWidgetItem):
     SUMMARY = 0
     AUTHOR = 1
     DATE = 2
+    GRAPH = 3
 
     def __init__(self, commit, parent=None):
         QtWidgets.QTreeWidgetItem.__init__(self, parent)
@@ -1158,9 +1159,11 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         # instead of calling the delegate's sizeHint() for every commit, which
         # is a large saving on big histories.
         self.setUniformRowHeights(True)
-        self.setHeaderLabels([N_('Summary'), N_('Author'), N_('Date, Time')])
+        self.setHeaderLabels(
+            [N_('Summary'), N_('Author'), N_('Date, Time'), N_('Graph')]
+        )
         self.header().setSectionResizeMode(
-            CommitTreeWidgetItem.DATE, QtWidgets.QHeaderView.Stretch
+            CommitTreeWidgetItem.GRAPH, QtWidgets.QHeaderView.Stretch
         )
 
         self.graph_delegate = GraphDelegate(self)
@@ -1204,9 +1207,12 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         except (KeyError, ValueError):
             column_widths = None
         if column_widths:
-            # We only care about the first two columns. This allows the final
+            # We only care about the first three columns. This allows the final
             # column to stretch and shrink.
-            self.set_column_widths(column_widths[:2])
+            count = 3 if len(column_widths) >= 4 else 2
+            self.set_column_widths(column_widths[:count])
+            if count == 2:
+                self.setColumnWidth(CommitTreeWidgetItem.DATE, 160)
             self._column_init_state = ColumnInitState.SHOW_EVENT
         return True
 
@@ -1219,11 +1225,9 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         if self._column_init_state < ColumnInitState.SHOW_EVENT:
             self._column_init_state = ColumnInitState.SHOW_EVENT
             width = self.header().width()
-            one_half = width // 2
-            one_quarter = width // 4
-            # Set initial SUMMARY column width; it will be adjusted when graph loads.
-            self.setColumnWidth(CommitTreeWidgetItem.SUMMARY, one_half)
-            self.setColumnWidth(CommitTreeWidgetItem.AUTHOR, one_quarter)
+            self.setColumnWidth(CommitTreeWidgetItem.SUMMARY, width * 2 // 5)
+            self.setColumnWidth(CommitTreeWidgetItem.AUTHOR, width // 6)
+            self.setColumnWidth(CommitTreeWidgetItem.DATE, width // 5)
 
     def display_inline_graph(self, enabled):
         """Enable and disable the display of inline graph in the commit list"""
@@ -1231,7 +1235,8 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             delegate = self.graph_delegate
         else:
             delegate = None
-        self.setItemDelegateForColumn(CommitTreeWidgetItem.SUMMARY, delegate)
+        self.setItemDelegateForColumn(CommitTreeWidgetItem.GRAPH, delegate)
+        self.setColumnHidden(CommitTreeWidgetItem.GRAPH, not enabled)
 
     # ViewerMixin
     def go_up(self):
@@ -1339,18 +1344,14 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             row_idx = oid_to_index.get(item.commit.oid)
             if row_idx is None:
                 continue
-            item.setData(CommitTreeWidgetItem.SUMMARY, GRAPH_ROW_ROLE, rows[row_idx])
-            item.setData(CommitTreeWidgetItem.SUMMARY, COMMIT_ROLE, item.commit)
+            item.setData(CommitTreeWidgetItem.GRAPH, GRAPH_ROW_ROLE, rows[row_idx])
+            item.setData(CommitTreeWidgetItem.GRAPH, COMMIT_ROLE, item.commit)
             if row_idx > 0:
                 item.setData(
-                    CommitTreeWidgetItem.SUMMARY,
+                    CommitTreeWidgetItem.GRAPH,
                     GRAPH_PREV_ROW_ROLE,
                     rows[row_idx - 1],
                 )
-        # Resize column to fit content after graph data is loaded.
-        if self._column_init_state < ColumnInitState.GRAPH:
-            self._column_init_state = ColumnInitState.GRAPH
-            self.resizeColumnToContents(CommitTreeWidgetItem.SUMMARY)
 
     def create_patch(self):
         """Export a patch from the selected items"""
@@ -1382,12 +1383,12 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
     def mouseMoveEvent(self, event: QtGui.QMouseEvent):
         pos = event.pos()
         item = self.itemAt(pos)
-        rect = self.visualItemRect(item) if item is not None else QtCore.QRectF()
         index = (
-            self.indexFromItem(item, CommitTreeWidgetItem.SUMMARY)
+            self.indexFromItem(item, CommitTreeWidgetItem.GRAPH)
             if item is not None
             else -1
         )
+        rect = self.visualRect(index) if item is not None else QtCore.QRectF()
         self.graph_delegate.update_label_hover(
             pos, rect, self.fontMetrics(), index, item
         )
