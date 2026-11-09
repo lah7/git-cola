@@ -787,10 +787,8 @@ def _prepare_labels(refs: list[str]) -> list[tuple[str, str, str | None]]:
         remotes = groups.get(branch_name, [])
         # sort by is_local, display -> local branch will always be last
         remotes.sort(key=lambda item: (item[1], item[2]))
-        condense_count = len(remotes) - 1
-
-        for i, (ref, _, display, condensed) in enumerate(remotes):
-            result.append((ref, display, condensed if i < condense_count else None))
+        for ref, _, display, _ in remotes:
+            result.append((ref, display, None))
 
     return result
 
@@ -822,43 +820,6 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
     LABEL_SPACING = 4
     LABEL_TEXT_OFFSET = 3
     LABEL_VERTICAL_OFFSET = 1
-    ANIMATION_DURATION = 50
-
-    def __init__(self, parent=None) -> None:
-        super().__init__(parent)
-        self._hover_item: object | None = None
-        self._hover_label_idx: int = -1
-        self._expand_progress: float = 0.0
-        self._animation = QtCore.QVariantAnimation(self)
-        self._animation.setDuration(self.ANIMATION_DURATION)
-        self._animation.valueChanged.connect(self._on_animation_value)
-        self._animation.finished.connect(self._on_animation_finished)
-
-    def _on_animation_value(self, value):
-        self._expand_progress = value
-        parent = self.parent()
-        if parent is not None:
-            parent.viewport().update()
-
-    def _on_animation_finished(self) -> None:
-        if self._expand_progress == 0.0:
-            self._hover_item = None
-            self._hover_label_idx = -1
-
-    def set_hover(self, item: object | None, label_idx: int) -> None:
-        if item == self._hover_item and label_idx == self._hover_label_idx:
-            return
-        self._animation.stop()
-        if label_idx >= 0 and item is not None:
-            self._hover_item = item
-            self._hover_label_idx = label_idx
-            self._animation.setStartValue(0.0)
-            self._animation.setEndValue(1.0)
-            self._animation.start()
-        else:
-            self._animation.setStartValue(self._expand_progress)
-            self._animation.setEndValue(0.0)
-            self._animation.start()
 
     def paint(self, painter, option, index):
         row = index.data(GRAPH_ROW_ROLE)
@@ -945,15 +906,12 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
         if commit and commit.tags:
             painter.setFont(option.font)
-            tree = self.parent()
-            item = tree.itemFromIndex(index) if tree else None
             labels_width = self._draw_labels(
                 painter,
                 QtCore.QRectF(rect).center().y(),
                 commit.tags,
                 label_x,
                 option.fontMetrics,
-                item,
                 dark,
             )
 
@@ -982,7 +940,6 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         tags: list[str],
         start_x: int,
         font_metrics: QtGui.QFontMetrics,
-        item: object | None,
         dark: bool = False,
     ):
         """Draw branch/tag labels and return total width used."""
@@ -990,7 +947,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         x_offset = self.LABEL_TEXT_OFFSET
         y_offset = self.LABEL_VERTICAL_OFFSET
 
-        for i, (tag, display_text, condensed_text) in enumerate(_prepare_labels(tags)):
+        for tag, display_text, condensed_text in _prepare_labels(tags):
             pen = self.text_pen
             brush = self.other_color
 
@@ -1012,9 +969,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
                     painter.setPen(pen)
                     painter.setBrush(brush)
 
-            shown, text_width = self._label_shown_text(
-                condensed_text, display_text, font_metrics, item, i
-            )
+            text_width = font_metrics.horizontalAdvance(display_text)
             text_height = font_metrics.height()
 
             text_rect = QtCore.QRectF(
@@ -1035,7 +990,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
                 painter.setClipRect(
                     text_rect.adjusted(-x_offset, 0, x_offset, 0), Qt.IntersectClip
                 )
-                painter.drawText(text_rect, Qt.AlignLeft | Qt.AlignVCenter, shown)
+                painter.drawText(text_rect, Qt.AlignLeft | Qt.AlignVCenter, display_text)
                 painter.restore()
 
             current_x += text_width + x_offset * 2 + self._get_spacing(condensed_text)
@@ -1044,30 +999,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
     def _labels_width(self, font_metrics: QtGui.QFontMetrics, tags: list[str]):
         """Calculate total width needed for all labels."""
-        return self._draw_labels(None, 0, tags, 0, font_metrics, None)
-
-    def _label_shown_text(
-        self,
-        condensed_text: str | None,
-        display_text: str,
-        font_metrics: QtGui.QFontMetrics,
-        item: object | None,
-        label_idx: int,
-    ) -> tuple[str, int]:
-        """Return (text_to_draw, pixel_width) for a label"""
-        if not condensed_text:
-            return display_text, font_metrics.horizontalAdvance(display_text)
-        is_hovered = (
-            item is not None
-            and item is self._hover_item
-            and label_idx == self._hover_label_idx
-        )
-        if not is_hovered or self._expand_progress == 0.0:
-            return condensed_text, font_metrics.horizontalAdvance(condensed_text)
-        condensed_w = font_metrics.horizontalAdvance(condensed_text)
-        full_w = font_metrics.horizontalAdvance(display_text)
-        width = condensed_w + (full_w - condensed_w) * self._expand_progress
-        return display_text, width
+        return self._draw_labels(None, 0, tags, 0, font_metrics)
 
     def _graph_width(self, row, prev_row):
         """Calculate the width needed for the graph."""
@@ -1112,7 +1044,6 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         rect: QtCore.QRectF,
         font_metrics: QtGui.QFontMetrics,
         index: int,
-        item: object | None,
     ) -> tuple[int, bool]:
         """Return (index, is_condensed) if pos is over a label, else (-1, False)."""
         commit = index.data(COMMIT_ROLE)
@@ -1127,9 +1058,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         for i, (_, display_text, condensed_text) in enumerate(
             _prepare_labels(commit.tags)
         ):
-            _, text_width = self._label_shown_text(
-                condensed_text, display_text, font_metrics, item, i
-            )
+            text_width = font_metrics.horizontalAdvance(display_text)
             box_left = current_x - x_offset
             box_right = current_x + text_width + x_offset
             box_top = mid_y - text_height / 2
@@ -1147,17 +1076,9 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         index: int,
         item: object | None,
     ) -> bool:
-        if item is None:
-            self.set_hover(None, -1)
-            return False
-        label_idx, is_condensed = self.label_hit_test(
-            pos, rect, font_metrics, index, item
-        )
-        if label_idx >= 0 and is_condensed is not None:
-            self.set_hover(item, label_idx)
-        else:
-            self.set_hover(None, -1)
-        return label_idx >= 0
+        return item is not None and self.label_hit_test(
+            pos, rect, font_metrics, index
+        )[0] >= 0
 
 
 class CommitTreeWidgetItem(QtWidgets.QTreeWidgetItem):
@@ -1290,7 +1211,6 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             delegate = self.graph_delegate
         else:
             delegate = None
-            self.graph_delegate.set_hover(None, -1)
             self.viewport().unsetCursor()
         self.setItemDelegateForColumn(CommitTreeWidgetItem.GRAPH, delegate)
         if not enabled and not was_hidden:
@@ -1444,7 +1364,7 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             rect = self.visualRect(index)
             if rect.contains(event.pos()):
                 label_idx, _ = self.graph_delegate.label_hit_test(
-                    event.pos(), rect, self.fontMetrics(), index, item
+                    event.pos(), rect, self.fontMetrics(), index
                 )
                 if label_idx >= 0:
                     label = _prepare_labels(item.commit.tags)[label_idx][1]
@@ -1471,7 +1391,6 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             self.viewport().unsetCursor()
 
     def leaveEvent(self, event):
-        self.graph_delegate.set_hover(None, -1)
         self.viewport().unsetCursor()
         QtWidgets.QTreeWidget.leaveEvent(self, event)
 
